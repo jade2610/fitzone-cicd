@@ -1,0 +1,33 @@
+name: CI - Integración Continua
+
+on:
+  push:
+    branches: [ "develop", "feature/**" ]
+  pull_request:
+    branches: [ "develop" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Compilar código fuente
+        run: |
+          mkdir -p out
+          javac -d out src/*.java
+
+      - name: Compilar y ejecutar pruebas
+        run: |
+          javac -d out -cp out test/*.java
+          java -cp out CalculadoraFacturaTest
