@@ -1,0 +1,55 @@
+name: CD - Despliegue a Producción
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Compilar y empaquetar para Producción
+        run: |
+          mkdir -p out
+          javac -d out src/*.java
+          jar cfe fitzone-facturacion.jar Main -C out .
+
+      - name: Publicar paquete generado
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitzone-jar
+          path: fitzone-facturacion.jar
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Instalar JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Descargar paquete
+        uses: actions/download-artifact@v4
+        with:
+          name: fitzone-jar
+
+      - name: Desplegar en Producción (simulado)
+        run: |
+          echo "Desplegando fitzone-facturacion.jar (${{ github.sha }})"
+          echo 100 | java -jar fitzone-facturacion.jar
+          echo "Despliegue simulado completado."

@@ -1,0 +1,45 @@
+name: QA - Validación previa a Producción
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validar rama de origen del Pull Request
+        env:
+          ORIGEN: ${{ github.head_ref }}
+        run: |
+          if [[ "$ORIGEN" != "develop" && "$ORIGEN" != hotfix/* ]]; then
+            echo "Solo se permite main desde develop o hotfix/*: $ORIGEN"
+            exit 1
+          fi
+          echo "Rama de origen válida: $ORIGEN"
+
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Compilar y ejecutar pruebas de QA
+        shell: bash
+        run: |
+          mkdir -p out
+          javac -d out src/*.java
+          javac -d out -cp out test/*.java
+          java -cp out CalculadoraFacturaTest | tee resultado-qa.txt
+
+      - name: Guardar evidencia de QA
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-qa
+          path: resultado-qa.txt
