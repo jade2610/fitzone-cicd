@@ -1,32 +1,11 @@
-public class CalculadoraFacturaTest {
-    public static void main(String[] args) {
-        // Caso 1 (v1): total = subtotal + IGV 18%
-        verificar(100, 118.00, "subtotal 100 -> total 118.00");
+public class CalculadoraFactura {
+    public static final double IGV = 0.18;
 
-        // Caso 2 (v2): los montos <= 0 deben ser rechazados
-        verificarExcepcion(0);
-        verificarExcepcion(-50);
-
-        System.out.println("Todas las pruebas pasaron.");
-    }
-
-    static void verificar(double subtotal, double esperado, String caso) {
-        double total = CalculadoraFactura.calcularTotal(subtotal);
-        if (Math.abs(total - esperado) > 0.0001) {
-            throw new AssertionError("FALLÓ: " + caso + " (obtenido " + total + ")");
+    // v2: se rechazan los montos menores o iguales a cero
+    public static double calcularTotal(double subtotal) {
+        if (subtotal <= 0) {
+            throw new IllegalArgumentException("El monto debe ser mayor a 0");
         }
-        System.out.println("OK: " + caso);
-    }
-
-    static void verificarExcepcion(double monto) {
-        try {
-            CalculadoraFactura.calcularTotal(monto);
-        } catch (IllegalArgumentException e) {
-            System.out.println("OK: monto " + monto + " rechazado");
-            return;
-        }
-        throw new AssertionError("FALLÓ: monto " + monto + " debía rechazarse");
+        return subtotal * (1 + IGV);
     }
 }
-EOF
-git status
