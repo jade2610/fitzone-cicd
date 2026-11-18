@@ -7,6 +7,9 @@ public class CalculadoraFacturaTest {
         verificarExcepcion(0);
         verificarExcepcion(-50);
 
+        // Caso 3 (v3): el total se redondea a 2 decimales
+        verificar(99.99, 117.99, "subtotal 99.99 -> total 117.99");
+
         System.out.println("Todas las pruebas pasaron.");
     }
 
